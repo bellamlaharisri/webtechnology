@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exp 7 · Online Quiz Application</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#12172b; --surface:#1b2140; --surface-2:#232a4d;
+    --accent:#3ddc97; --accent-2:#ffb347; --danger:#ff6b6b;
+    --text:#eef1fb; --muted:#9aa3c7; --border:#2f3766;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh; font-family:'Inter',sans-serif; background:var(--bg);
+    color:var(--text); display:flex; justify-content:center; padding:40px 16px;
+  }
+  .wrap{width:100%; max-width:520px;}
+  h1{font-family:'Space Grotesk',sans-serif; text-align:center; margin-bottom:4px;}
+  p.sub{text-align:center; color:var(--muted); font-size:0.88rem; margin-bottom:22px;}
+
+  .card{
+    background:var(--surface); border:1px solid var(--border); border-radius:18px;
+    padding:26px; box-shadow:0 20px 50px rgba(0,0,0,0.35);
+  }
+  .progress-bar{height:6px; background:var(--surface-2); border-radius:4px; overflow:hidden; margin-bottom:18px;}
+  .progress-fill{height:100%; background:var(--accent); width:0%; transition:width .3s;}
+  .q-count{font-size:0.8rem; color:var(--muted); margin-bottom:10px;}
+  .q-text{font-family:'Space Grotesk',sans-serif; font-size:1.15rem; margin-bottom:18px;}
+
+  .option{
+    display:block; width:100%; text-align:left; padding:13px 16px; margin-bottom:10px;
+    border-radius:10px; border:1px solid var(--border); background:var(--surface-2);
+    color:var(--text); font-size:0.92rem; cursor:pointer; transition:border-color .15s, background .15s;
+  }
+  .option:hover{border-color:var(--accent);}
+  .option.correct{background:rgba(61,220,151,0.18); border-color:var(--accent); color:var(--accent);}
+  .option.incorrect{background:rgba(255,107,107,0.18); border-color:var(--danger); color:var(--danger);}
+  .option[disabled]{cursor:default;}
+
+  .next-btn{
+    margin-top:8px; width:100%; padding:12px; border:none; border-radius:10px;
+    background:var(--accent); color:#0d1420; font-weight:700; cursor:pointer;
+    opacity:0.4; pointer-events:none; transition:opacity .15s;
+  }
+  .next-btn.enabled{opacity:1; pointer-events:auto;}
+
+  .result{text-align:center;}
+  .result .score{
+    font-family:'Space Grotesk',sans-serif; font-size:2.6rem; color:var(--accent); margin:10px 0 4px;
+  }
+  .result .msg{color:var(--muted); margin-bottom:20px; font-size:0.9rem;}
+  .restart{
+    padding:11px 22px; border:none; border-radius:8px; background:var(--accent-2);
+    color:#241708; font-weight:700; cursor:pointer;
+  }
+  .hidden{display:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Web Dev Quick Quiz</h1>
+  <p class="sub">Automatic scoring — pick an answer to see the result instantly</p>
+
+  <div class="card">
+    <div id="quizView">
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="q-count" id="qCount"></div>
+      <div class="q-text" id="qText"></div>
+      <div id="options"></div>
+      <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Next Question</button>
+    </div>
+
+    <div id="resultView" class="result hidden">
+      <div class="q-count">Quiz Complete</div>
+      <div class="score" id="finalScore">0 / 0</div>
+      <div class="msg" id="finalMsg"></div>
+      <button class="restart" onclick="restartQuiz()">Try Again</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Array of question objects
+  const questions = [
+    {
+      text: 'Which HTML tag is used to link an external CSS file?',
+      options: ['<style>', '<link>', '<script>', '<css>'],
+      answer: 1
+    },
+    {
+      text: 'Which CSS property controls the space between flex items?',
+      options: ['margin', 'gap', 'spacing', 'padding'],
+      answer: 1
+    },
+    {
+      text: 'Which JavaScript method adds an item to the end of an array?',
+      options: ['push()', 'pop()', 'shift()', 'append()'],
+      answer: 0
+    },
+    {
+      text: 'Which built-in object provides Math.max() and Math.min()?',
+      options: ['Number', 'Array', 'Math', 'Object'],
+      answer: 2
+    },
+    {
+      text: 'Which event fires when a user clicks a button?',
+      options: ['onchange', 'onclick', 'onhover', 'onsubmit'],
+      answer: 1
+    }
+  ];
+
+  let currentIndex = 0;
+  let score = 0;
+  let answered = false;
+
+  function loadQuestion() {
+    answered = false;
+    const q = questions[currentIndex];
+
+    document.getElementById('qCount').textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+    document.getElementById('qText').textContent = q.text;
+    document.getElementById('progressFill').style.width = `${(currentIndex / questions.length) * 100}%`;
+    document.getElementById('nextBtn').classList.remove('enabled');
+    document.getElementById('nextBtn').textContent =
+      currentIndex === questions.length - 1 ? 'See Results' : 'Next Question';
+
+    const optionsEl = document.getElementById('options');
+    optionsEl.innerHTML = '';
+
+    q.options.forEach((optText, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'option';
+      btn.textContent = optText;
+      btn.addEventListener('click', () => selectOption(i, btn));
+      optionsEl.appendChild(btn);
+    });
+  }
+
+  function selectOption(selectedIndex, btnEl) {
+    if (answered) return;
+    answered = true;
+
+    const q = questions[currentIndex];
+    const allButtons = document.querySelectorAll('.option');
+
+    allButtons.forEach((btn, i) => {
+      btn.setAttribute('disabled', 'true');
+      if (i === q.answer) btn.classList.add('correct');
+      else if (i === selectedIndex) btn.classList.add('incorrect');
+    });
+
+    if (selectedIndex === q.answer) score++;
+    document.getElementById('nextBtn').classList.add('enabled');
+  }
+
+  function nextQuestion() {
+    if (!answered) return;
+
+    if (currentIndex < questions.length - 1) {
+      currentIndex++;
+      loadQuestion();
+    } else {
+      showResult();
+    }
+  }
+
+  function showResult() {
+    document.getElementById('quizView').classList.add('hidden');
+    document.getElementById('resultView').classList.remove('hidden');
+    document.getElementById('finalScore').textContent = `${score} / ${questions.length}`;
+
+    const pct = (score / questions.length) * 100;
+    let message;
+    if (pct === 100) message = 'Perfect score! Excellent work.';
+    else if (pct >= 60) message = 'Good job — solid understanding.';
+    else message = 'Keep practicing, you\'ll get there.';
+    document.getElementById('finalMsg').textContent = message;
+  }
+
+  function restartQuiz() {
+    currentIndex = 0;
+    score = 0;
+    document.getElementById('resultView').classList.add('hidden');
+    document.getElementById('quizView').classList.remove('hidden');
+    loadQuestion();
+  }
+
+  loadQuestion();
+</script>
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exp 5 · College Website Layout</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1326; --surface:#171d3a; --surface-2:#1f2749;
+    --accent:#3ddc97; --accent-2:#ffb347; --text:#eef1fb; --muted:#9aa3c7; --border:#2a3260;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); line-height:1.6;}
+  a{color:inherit; text-decoration:none;}
+  ul{list-style:none;}
+
+  header{
+    position:sticky; top:0; z-index:50;
+    background:rgba(15,19,38,0.9); backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--border);
+  }
+  nav{
+    max-width:1100px; margin:0 auto; display:flex; align-items:center;
+    justify-content:space-between; padding:16px 24px;
+  }
+  .logo{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.2rem; color:var(--accent);}
+  .nav-links{display:flex; gap:28px; font-size:0.9rem;}
+  .nav-links a:hover{color:var(--accent);}
+  .menu-toggle{display:none; flex-direction:column; gap:4px; background:none; border:none; cursor:pointer;}
+  .menu-toggle span{width:22px; height:2px; background:var(--text);}
+
+  .hero{
+    max-width:1100px; margin:0 auto; padding:80px 24px 60px;
+    display:grid; grid-template-columns:1.1fr 0.9fr; gap:40px; align-items:center;
+  }
+  .hero h1{font-family:'Space Grotesk',sans-serif; font-size:2.4rem; margin-bottom:16px;}
+  .hero span{color:var(--accent);}
+  .hero p{color:var(--muted); margin-bottom:24px;}
+  .btn{
+    display:inline-block; background:var(--accent); color:#0d1420; font-weight:600;
+    padding:12px 24px; border-radius:8px;
+  }
+  .hero-visual{
+    height:260px; border-radius:18px;
+    background:linear-gradient(135deg, var(--accent), var(--surface-2) 70%);
+    position:relative; overflow:hidden;
+  }
+  .hero-visual::after{
+    content:'SIMATS'; position:absolute; bottom:16px; right:20px;
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.4rem; opacity:0.35;
+  }
+
+  section{max-width:1100px; margin:0 auto; padding:60px 24px;}
+  section h2{font-family:'Space Grotesk',sans-serif; font-size:1.7rem; margin-bottom:8px;}
+  section p.lead{color:var(--muted); margin-bottom:32px; max-width:600px;}
+
+  .dept-grid{
+    display:grid; grid-template-columns:repeat(3, 1fr); gap:20px;
+  }
+  .dept-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:14px;
+    padding:22px; transition:transform .15s, border-color .15s;
+  }
+  .dept-card:hover{transform:translateY(-4px); border-color:var(--accent);}
+  .dept-card .tag{
+    display:inline-block; font-size:0.7rem; color:var(--accent-2);
+    border:1px solid var(--accent-2); padding:2px 8px; border-radius:999px; margin-bottom:10px;
+  }
+  .dept-card h3{font-family:'Space Grotesk',sans-serif; margin-bottom:8px;}
+  .dept-card p{color:var(--muted); font-size:0.88rem;}
+
+  .stats-band{
+    background:var(--surface); border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+  }
+  .stats-inner{
+    max-width:1100px; margin:0 auto; padding:36px 24px;
+    display:grid; grid-template-columns:repeat(4,1fr); gap:20px; text-align:center;
+  }
+  .stats-inner .num{font-family:'Space Grotesk',sans-serif; font-size:1.8rem; color:var(--accent); font-weight:700;}
+  .stats-inner .lbl{color:var(--muted); font-size:0.8rem; margin-top:4px;}
+
+  footer{
+    border-top:1px solid var(--border); padding:28px 24px; text-align:center;
+    color:var(--muted); font-size:0.85rem;
+  }
+
+  @media (max-width:800px){
+    .nav-links{
+      position:absolute; top:64px; left:0; right:0; background:var(--surface);
+      flex-direction:column; padding:16px 24px; display:none; border-bottom:1px solid var(--border);
+    }
+    .nav-links.open{display:flex;}
+    .menu-toggle{display:flex;}
+    .hero{grid-template-columns:1fr; padding-top:50px;}
+    .dept-grid{grid-template-columns:1fr;}
+    .stats-inner{grid-template-columns:1fr 1fr;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <nav>
+    <div class="logo">SIMATS Engineering</div>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#home">Home</a></li>
+      <li><a href="#departments">Departments</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+</header>
+
+<section class="hero" id="home">
+  <div>
+    <h1>Shaping engineers who <span>build the future</span></h1>
+    <p>A responsive landing page built with semantic HTML5, CSS Grid and Flexbox — showcasing
+    departments, achievements and campus life in a clean, modern layout.</p>
+    <a href="#departments" class="btn">Explore Departments</a>
+  </div>
+  <div class="hero-visual"></div>
+</section>
+
+<section id="departments">
+  <h2>Our Departments</h2>
+  <p class="lead">Six core engineering disciplines, each backed by dedicated labs and faculty.</p>
+  <div class="dept-grid">
+    <div class="dept-card"><span class="tag">CSE</span><h3>Computer Science</h3><p>Software engineering, AI/ML, operating systems and cloud computing.</p></div>
+    <div class="dept-card"><span class="tag">ECE</span><h3>Electronics &amp; Comm.</h3><p>VLSI design, embedded systems and signal processing.</p></div>
+    <div class="dept-card"><span class="tag">MECH</span><h3>Mechanical</h3><p>Thermodynamics, robotics and manufacturing systems.</p></div>
+    <div class="dept-card"><span class="tag">CIVIL</span><h3>Civil Engineering</h3><p>Structural design, sustainable construction and surveying.</p></div>
+    <div class="dept-card"><span class="tag">IT</span><h3>Information Tech.</h3><p>Networking, cybersecurity and web technologies.</p></div>
+    <div class="dept-card"><span class="tag">EEE</span><h3>Electrical</h3><p>Power systems, control systems and renewable energy.</p></div>
+  </div>
+</section>
+
+<div class="stats-band">
+  <div class="stats-inner">
+    <div><div class="num">6</div><div class="lbl">Departments</div></div>
+    <div><div class="num">120+</div><div class="lbl">Faculty</div></div>
+    <div><div class="num">4500+</div><div class="lbl">Students</div></div>
+    <div><div class="num">30+</div><div class="lbl">Labs</div></div>
+  </div>
+</div>
+
+<section id="contact">
+  <h2>Visit Campus</h2>
+  <p class="lead">Reach out to the admissions office for department tours and enrollment details.</p>
+</section>
+
+<footer>&copy; 2026 SIMATS Engineering — Experiment 5: Responsive College Website Layout</footer>
+
+<script>
+  const toggle = document.getElementById('menuToggle');
+  const links = document.getElementById('navLinks');
+  toggle.addEventListener('click', () => links.classList.toggle('open'));
+</script>
+</body>
+</html>

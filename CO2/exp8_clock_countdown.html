@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exp 8 · Digital Clock &amp; Exam Countdown</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#12172b; --surface:#1b2140; --surface-2:#232a4d;
+    --accent:#3ddc97; --accent-2:#ffb347; --text:#eef1fb; --muted:#9aa3c7; --border:#2f3766;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh; font-family:'Inter',sans-serif; background:var(--bg);
+    color:var(--text); display:flex; justify-content:center; padding:40px 16px;
+  }
+  .wrap{width:100%; max-width:520px;}
+  h1{font-family:'Space Grotesk',sans-serif; text-align:center; margin-bottom:26px;}
+
+  .clock-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:18px;
+    padding:30px; text-align:center; margin-bottom:24px; box-shadow:0 20px 50px rgba(0,0,0,0.35);
+  }
+  .clock-card .label{color:var(--muted); font-size:0.8rem; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px;}
+  #liveTime{font-family:'JetBrains Mono',monospace; font-size:2.8rem; color:var(--accent); font-weight:600;}
+  #liveDate{color:var(--muted); font-size:0.9rem; margin-top:6px;}
+
+  .countdown-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:18px;
+    padding:26px; box-shadow:0 20px 50px rgba(0,0,0,0.35);
+  }
+  .countdown-card h2{font-family:'Space Grotesk',sans-serif; font-size:1.1rem; margin-bottom:16px; color:var(--accent-2);}
+  .set-row{display:flex; gap:10px; margin-bottom:20px;}
+  .set-row input{
+    flex:1; padding:10px; border-radius:8px; border:1px solid var(--border);
+    background:var(--surface-2); color:var(--text); font-size:0.9rem; outline:none;
+  }
+  .set-row button{
+    padding:0 18px; border:none; border-radius:8px; background:var(--accent-2);
+    color:#241708; font-weight:700; cursor:pointer;
+  }
+  .timer-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; text-align:center;}
+  .timer-block{background:var(--surface-2); border:1px solid var(--border); border-radius:12px; padding:14px 0;}
+  .timer-block .num{font-family:'JetBrains Mono',monospace; font-size:1.6rem; color:var(--accent); font-weight:600;}
+  .timer-block .unit{color:var(--muted); font-size:0.72rem; text-transform:uppercase; margin-top:2px;}
+  .status{text-align:center; margin-top:16px; font-size:0.9rem; color:var(--muted);}
+  .status.expired{color:var(--accent-2); font-weight:600;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Clock &amp; Exam Countdown</h1>
+
+  <div class="clock-card">
+    <div class="label">Current Time</div>
+    <div id="liveTime">--:--:--</div>
+    <div id="liveDate">--</div>
+  </div>
+
+  <div class="countdown-card">
+    <h2>Examination Countdown</h2>
+    <div class="set-row">
+      <input type="datetime-local" id="examDateTime">
+      <button onclick="setCountdown()">Set</button>
+    </div>
+    <div class="timer-grid">
+      <div class="timer-block"><div class="num" id="cdDays">00</div><div class="unit">Days</div></div>
+      <div class="timer-block"><div class="num" id="cdHours">00</div><div class="unit">Hours</div></div>
+      <div class="timer-block"><div class="num" id="cdMins">00</div><div class="unit">Mins</div></div>
+      <div class="timer-block"><div class="num" id="cdSecs">00</div><div class="unit">Secs</div></div>
+    </div>
+    <div class="status" id="cdStatus">Set an exam date &amp; time above to start the countdown</div>
+  </div>
+</div>
+
+<script>
+  const pad = n => String(n).padStart(2, '0');
+
+  function updateClock() {
+    const now = new Date();
+    const h = pad(now.getHours());
+    const m = pad(now.getMinutes());
+    const s = pad(now.getSeconds());
+    document.getElementById('liveTime').textContent = `${h}:${m}:${s}`;
+
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    document.getElementById('liveDate').textContent = now.toLocaleDateString(undefined, options);
+  }
+
+  let examTarget = null;
+  let countdownInterval = null;
+
+  function setCountdown() {
+    const value = document.getElementById('examDateTime').value;
+    if (!value) {
+      alert('Please choose a date and time for the exam.');
+      return;
+    }
+    examTarget = new Date(value);
+    document.getElementById('cdStatus').textContent = 'Counting down to your exam...';
+    document.getElementById('cdStatus').classList.remove('expired');
+
+    if (countdownInterval) clearInterval(countdownInterval);
+    updateCountdown();
+    countdownInterval = setInterval(updateCountdown, 1000);
+  }
+
+  function updateCountdown() {
+    if (!examTarget) return;
+
+    const now = new Date();
+    const diffMs = examTarget - now;
+
+    if (diffMs <= 0) {
+      document.getElementById('cdDays').textContent = '00';
+      document.getElementById('cdHours').textContent = '00';
+      document.getElementById('cdMins').textContent = '00';
+      document.getElementById('cdSecs').textContent = '00';
+      document.getElementById('cdStatus').textContent = 'Exam time has arrived — good luck!';
+      document.getElementById('cdStatus').classList.add('expired');
+      clearInterval(countdownInterval);
+      return;
+    }
+
+    const totalSeconds = Math.floor(diffMs / 1000);
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    document.getElementById('cdDays').textContent = pad(days);
+    document.getElementById('cdHours').textContent = pad(hours);
+    document.getElementById('cdMins').textContent = pad(minutes);
+    document.getElementById('cdSecs').textContent = pad(seconds);
+  }
+
+  updateClock();
+  setInterval(updateClock, 1000);
+</script>
+</body>
+</html>

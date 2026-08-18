@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exp 10 · Debug &amp; Correct a Web Application</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#12172b; --surface:#1b2140; --surface-2:#232a4d;
+    --accent:#3ddc97; --accent-2:#ffb347; --danger:#ff6b6b;
+    --text:#eef1fb; --muted:#9aa3c7; --border:#2f3766;
+  }
+  *{box-sizing:border-box;} /* BUG #1 FIX: original CSS omitted box-sizing:border-box,
+       which caused the padding on .converter-box to add to its declared width and
+       overflow the parent card. Found via Elements panel > Computed box model. */
+  body{margin:0; font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); padding:36px 16px;}
+  .wrap{max-width:640px; margin:0 auto;}
+  h1{font-family:'Space Grotesk',sans-serif; text-align:center; margin-bottom:6px;}
+  p.sub{text-align:center; color:var(--muted); margin-bottom:26px; font-size:0.9rem;}
+
+  .panel{
+    background:var(--surface); border:1px solid var(--border); border-radius:16px;
+    padding:24px; box-shadow:0 20px 50px rgba(0,0,0,0.35); margin-bottom:22px;
+  }
+  .converter-box{
+    width:100%; padding:16px; border-radius:12px; background:var(--surface-2);
+    border:1px solid var(--border);
+  }
+  .row{display:flex; gap:10px; align-items:center; margin-bottom:14px;}
+  .row input{
+    flex:1; padding:10px 12px; border-radius:8px; border:1px solid var(--border);
+    background:var(--bg); color:var(--text); font-size:0.95rem; outline:none;
+  }
+  .row select{
+    padding:10px; border-radius:8px; border:1px solid var(--border);
+    background:var(--bg); color:var(--text); font-size:0.9rem;
+  }
+  button{
+    padding:11px 20px; border:none; border-radius:8px; background:var(--accent);
+    color:#0d1420; font-weight:700; cursor:pointer;
+  }
+  #output{
+    margin-top:14px; font-family:'JetBrains Mono',monospace; font-size:1.2rem; color:var(--accent);
+    min-height:28px;
+  }
+  #errorBox{
+    margin-top:10px; font-size:0.85rem; color:var(--danger); display:none;
+    background:rgba(255,107,107,0.1); border:1px solid var(--danger); border-radius:8px; padding:10px 12px;
+  }
+
+  .log{
+    background:#0d1224; border:1px solid var(--border); border-radius:12px;
+    padding:18px 20px; font-size:0.85rem; color:var(--muted); line-height:1.7;
+  }
+  .log h2{font-family:'Space Grotesk',sans-serif; font-size:1rem; color:var(--accent-2); margin-bottom:10px;}
+  .log ul{margin:0; padding-left:18px;}
+  .log code{color:var(--accent); background:rgba(61,220,151,0.1); padding:1px 6px; border-radius:4px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Temperature Converter — Debug Log</h1>
+  <p class="sub">A small app with two real bugs found and fixed using Chrome DevTools</p>
+
+  <div class="panel">
+    <div class="converter-box">
+      <div class="row">
+        <input type="text" id="tempInput" placeholder="Enter temperature">
+        <select id="fromUnit">
+          <option value="C">Celsius</option>
+          <option value="F">Fahrenheit</option>
+        </select>
+        <span>→</span>
+        <select id="toUnit">
+          <option value="F">Fahrenheit</option>
+          <option value="C">Celsius</option>
+        </select>
+      </div>
+      <button onclick="convertTemperature()">Convert</button>
+      <div id="output"></div>
+      <div id="errorBox"></div>
+    </div>
+  </div>
+
+  <div class="panel log">
+    <h2>Debugging Notes (DevTools Workflow)</h2>
+    <ul>
+      <li><b>Elements panel:</b> inspected <code>.converter-box</code> and found its rendered width
+        exceeded the parent panel. The <code>Computed</code> tab showed padding was being added on top
+        of the 100% width. Fixed by setting <code>box-sizing: border-box</code> globally.</li>
+      <li><b>Console panel:</b> converting a value returned <code>NaN</code>. Added
+        <code>console.log(rawValue, parsedValue)</code> at the top of <code>convertTemperature()</code>
+        to trace the value — it revealed <code>parseFloat()</code> was never called on the input, so a
+        string was being used in arithmetic.</li>
+      <li><b>Sources panel:</b> set a breakpoint on the conversion line and stepped through with the
+        <code>debugger;</code> keyword (left in place below, commented) to confirm the fixed formula
+        produces the correct result before removing the breakpoint.</li>
+      <li><b>Error handling:</b> wrapped the parsing logic in a <code>try...catch</code> block so an
+        invalid or empty input shows a friendly on-screen message instead of a silent console error.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  function convertTemperature() {
+    const errorBox = document.getElementById('errorBox');
+    const output = document.getElementById('output');
+    errorBox.style.display = 'none';
+
+    try {
+      const rawValue = document.getElementById('tempInput').value;
+
+      // BUG #2 FIX: original code used `rawValue` (a string) directly in the formula,
+      // producing string concatenation instead of arithmetic and returning NaN.
+      // console.log(rawValue, typeof rawValue) confirmed the type mismatch in the Console panel.
+      const parsedValue = parseFloat(rawValue);
+
+      if (isNaN(parsedValue)) {
+        throw new Error('Please enter a valid number.');
+      }
+
+      const fromUnit = document.getElementById('fromUnit').value;
+      const toUnit = document.getElementById('toUnit').value;
+
+      // debugger;  // <- was used here to step through the formula during debugging
+
+      let result;
+      if (fromUnit === toUnit) {
+        result = parsedValue;
+      } else if (fromUnit === 'C' && toUnit === 'F') {
+        result = (parsedValue * 9) / 5 + 32;
+      } else {
+        result = ((parsedValue - 32) * 5) / 9;
+      }
+
+      output.textContent = `${parsedValue}°${fromUnit} = ${result.toFixed(2)}°${toUnit}`;
+    } catch (err) {
+      errorBox.textContent = err.message;
+      errorBox.style.display = 'block';
+      output.textContent = '';
+    }
+  }
+</script>
+</body>
+</html>

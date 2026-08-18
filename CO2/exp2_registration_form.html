@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exp 2 · Student Registration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#12172b; --surface:#1b2140; --surface-2:#232a4d;
+    --accent:#3ddc97; --danger:#ff6b6b; --text:#eef1fb;
+    --muted:#9aa3c7; --border:#2f3766;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:'Inter',sans-serif; background:var(--bg); color:var(--text);
+    display:flex; justify-content:center; padding:40px 16px;
+  }
+  .wrap{width:100%; max-width:520px;}
+  h1{
+    font-family:'Space Grotesk',sans-serif; text-align:center; margin-bottom:6px; font-size:1.6rem;
+  }
+  p.sub{text-align:center; color:var(--muted); margin-bottom:24px; font-size:0.9rem;}
+  form{
+    background:var(--surface); border:1px solid var(--border); border-radius:16px;
+    padding:28px; box-shadow:0 20px 50px rgba(0,0,0,0.35);
+  }
+  .field{margin-bottom:18px;}
+  label{display:block; font-size:0.85rem; margin-bottom:6px; color:var(--muted);}
+  input, select{
+    width:100%; padding:11px 12px; border-radius:8px; border:1px solid var(--border);
+    background:var(--surface-2); color:var(--text); font-size:0.95rem; outline:none;
+    transition:border-color .15s;
+  }
+  input:focus, select:focus{border-color:var(--accent);}
+  input.invalid{border-color:var(--danger);}
+  .error{
+    color:var(--danger); font-size:0.78rem; min-height:16px; margin-top:4px; display:block;
+  }
+  .checkbox-row{display:flex; align-items:center; gap:8px; font-size:0.85rem; color:var(--muted);}
+  .checkbox-row input{width:auto;}
+  button{
+    width:100%; padding:13px; margin-top:8px; border:none; border-radius:8px;
+    background:var(--accent); color:#0d1420; font-weight:600; font-size:1rem; cursor:pointer;
+    transition:transform .1s;
+  }
+  button:hover{transform:translateY(-1px);}
+  #successMsg{
+    display:none; margin-top:16px; padding:12px 14px; border-radius:8px;
+    background:rgba(61,220,151,0.12); border:1px solid var(--accent); color:var(--accent);
+    font-size:0.9rem; text-align:center;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Student Registration</h1>
+  <p class="sub">Fields are validated live as you type</p>
+
+  <form id="regForm" novalidate>
+    <div class="field">
+      <label for="fullName">Full Name</label>
+      <input type="text" id="fullName" placeholder="e.g. Frootie R">
+      <span class="error" id="err-fullName"></span>
+    </div>
+
+    <div class="field">
+      <label for="email">Email Address</label>
+      <input type="text" id="email" placeholder="you@example.com">
+      <span class="error" id="err-email"></span>
+    </div>
+
+    <div class="field">
+      <label for="phone">Phone Number</label>
+      <input type="text" id="phone" placeholder="10-digit mobile number">
+      <span class="error" id="err-phone"></span>
+    </div>
+
+    <div class="field">
+      <label for="course">Course</label>
+      <select id="course">
+        <option value="">Select a course</option>
+        <option>B.E. Computer Science</option>
+        <option>B.Tech IT</option>
+        <option>B.E. ECE</option>
+        <option>B.E. Mechanical</option>
+      </select>
+      <span class="error" id="err-course"></span>
+    </div>
+
+    <div class="field">
+      <label for="password">Password</label>
+      <input type="password" id="password" placeholder="Min. 8 characters, 1 number, 1 letter">
+      <span class="error" id="err-password"></span>
+    </div>
+
+    <div class="field">
+      <label for="confirmPassword">Confirm Password</label>
+      <input type="password" id="confirmPassword" placeholder="Re-enter password">
+      <span class="error" id="err-confirmPassword"></span>
+    </div>
+
+    <div class="field">
+      <div class="checkbox-row">
+        <input type="checkbox" id="terms">
+        <label for="terms" style="margin:0;">I agree to the terms and conditions</label>
+      </div>
+      <span class="error" id="err-terms"></span>
+    </div>
+
+    <button type="submit">Register</button>
+    <div id="successMsg">Registration successful! Welcome aboard.</div>
+  </form>
+</div>
+
+<script>
+  const form = document.getElementById('regForm');
+
+  // Regular expressions for validation
+  const nameRegex = /^[A-Za-z ]{3,40}$/;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const phoneRegex = /^[6-9]\d{9}$/;
+  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
+
+  function showError(fieldId, message) {
+    document.getElementById('err-' + fieldId).textContent = message;
+    document.getElementById(fieldId).classList.toggle('invalid', !!message);
+  }
+
+  function validateField(fieldId) {
+    const value = document.getElementById(fieldId).value.trim();
+
+    switch (fieldId) {
+      case 'fullName':
+        if (!nameRegex.test(value)) return showError(fieldId, 'Enter a valid name (letters only, 3-40 chars)'), false;
+        break;
+      case 'email':
+        if (!emailRegex.test(value)) return showError(fieldId, 'Enter a valid email address'), false;
+        break;
+      case 'phone':
+        if (!phoneRegex.test(value)) return showError(fieldId, 'Enter a valid 10-digit mobile number'), false;
+        break;
+      case 'course':
+        if (!value) return showError(fieldId, 'Please select a course'), false;
+        break;
+      case 'password':
+        if (!passwordRegex.test(value)) return showError(fieldId, 'Min 8 chars, letters and numbers'), false;
+        break;
+      case 'confirmPassword':
+        const pw = document.getElementById('password').value;
+        if (value !== pw) return showError(fieldId, 'Passwords do not match'), false;
+        break;
+    }
+    showError(fieldId, '');
+    return true;
+  }
+
+  // Live validation on every keystroke / change
+  ['fullName','email','phone','course','password','confirmPassword'].forEach(id => {
+    document.getElementById(id).addEventListener('input', () => validateField(id));
+    document.getElementById(id).addEventListener('change', () => validateField(id));
+  });
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const fields = ['fullName','email','phone','course','password','confirmPassword'];
+    let allValid = fields.map(validateField).every(Boolean);
+
+    const termsChecked = document.getElementById('terms').checked;
+    document.getElementById('err-terms').textContent = termsChecked ? '' : 'You must accept the terms';
+    if (!termsChecked) allValid = false;
+
+    const successMsg = document.getElementById('successMsg');
+    if (allValid) {
+      successMsg.style.display = 'block';
+      form.reset();
+      setTimeout(() => successMsg.style.display = 'none', 4000);
+    } else {
+      successMsg.style.display = 'none';
+    }
+  });
+</script>
+</body>
+</html>

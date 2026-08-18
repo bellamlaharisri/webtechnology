@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exp 6 · Dynamic To-Do List</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#12172b; --surface:#1b2140; --surface-2:#232a4d;
+    --accent:#3ddc97; --accent-2:#ffb347; --danger:#ff6b6b;
+    --text:#eef1fb; --muted:#9aa3c7; --border:#2f3766;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh; font-family:'Inter',sans-serif; background:var(--bg);
+    color:var(--text); display:flex; justify-content:center; padding:40px 16px;
+  }
+  .wrap{width:100%; max-width:480px;}
+  h1{font-family:'Space Grotesk',sans-serif; text-align:center; margin-bottom:4px;}
+  p.sub{text-align:center; color:var(--muted); font-size:0.88rem; margin-bottom:22px;}
+
+  .panel{
+    background:var(--surface); border:1px solid var(--border); border-radius:16px;
+    padding:22px; box-shadow:0 20px 50px rgba(0,0,0,0.35);
+  }
+  .input-row{display:flex; gap:8px; margin-bottom:16px;}
+  input{
+    flex:1; padding:11px 12px; border-radius:8px; border:1px solid var(--border);
+    background:var(--surface-2); color:var(--text); font-size:0.92rem; outline:none;
+  }
+  input:focus{border-color:var(--accent);}
+  button.add{
+    padding:0 18px; border:none; border-radius:8px; background:var(--accent);
+    color:#0d1420; font-weight:700; cursor:pointer;
+  }
+  .filters{display:flex; gap:8px; margin-bottom:14px;}
+  .filters button{
+    flex:1; padding:7px 0; border-radius:7px; border:1px solid var(--border);
+    background:var(--surface-2); color:var(--muted); font-size:0.8rem; cursor:pointer;
+  }
+  .filters button.active{background:rgba(61,220,151,0.15); color:var(--accent); border-color:var(--accent);}
+
+  ul#taskList{list-style:none; margin:0; padding:0;}
+  li{
+    display:flex; align-items:center; gap:10px; padding:11px 6px;
+    border-bottom:1px solid var(--border);
+  }
+  li:last-child{border-bottom:none;}
+  li input[type="checkbox"]{width:18px; height:18px; accent-color:var(--accent); flex-shrink:0;}
+  li .task-text{
+    flex:1; font-size:0.92rem; outline:none; padding:4px 6px; border-radius:6px;
+  }
+  li.done .task-text{color:var(--muted); text-decoration:line-through;}
+  li .task-text[contenteditable="true"]:focus{background:var(--surface-2);}
+  li .icon-btn{
+    background:none; border:none; cursor:pointer; font-size:0.9rem; color:var(--muted); padding:4px;
+  }
+  li .icon-btn.edit:hover{color:var(--accent-2);}
+  li .icon-btn.del:hover{color:var(--danger);}
+
+  .empty{text-align:center; color:var(--muted); padding:24px 0; font-size:0.9rem;}
+  .count{text-align:center; color:var(--muted); font-size:0.8rem; margin-top:14px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>To-Do List</h1>
+  <p class="sub">Add, edit, complete and delete tasks — stored live in an array</p>
+
+  <div class="panel">
+    <div class="input-row">
+      <input type="text" id="taskInput" placeholder="What needs to be done?">
+      <button class="add" onclick="addTask()">Add</button>
+    </div>
+
+    <div class="filters">
+      <button class="active" data-filter="all" onclick="setFilter('all', this)">All</button>
+      <button data-filter="active" onclick="setFilter('active', this)">Active</button>
+      <button data-filter="done" onclick="setFilter('done', this)">Completed</button>
+    </div>
+
+    <ul id="taskList"></ul>
+    <div class="count" id="taskCount"></div>
+  </div>
+</div>
+
+<script>
+  let tasks = [];      // array of {id, text, done}
+  let filter = 'all';
+  let nextId = 1;
+
+  const listEl = document.getElementById('taskList');
+  const input = document.getElementById('taskInput');
+
+  function addTask() {
+    const text = input.value.trim();
+    if (!text) return;
+    tasks.push({ id: nextId++, text, done: false });
+    input.value = '';
+    render();
+  }
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') addTask();
+  });
+
+  function toggleDone(id) {
+    const task = tasks.find(t => t.id === id);
+    if (task) task.done = !task.done;
+    render();
+  }
+
+  function deleteTask(id) {
+    tasks = tasks.filter(t => t.id !== id);
+    render();
+  }
+
+  function editTask(id, span) {
+    span.setAttribute('contenteditable', 'true');
+    span.focus();
+
+    const finish = () => {
+      span.removeAttribute('contenteditable');
+      const task = tasks.find(t => t.id === id);
+      const newText = span.textContent.trim();
+      if (task) task.text = newText || task.text;
+      render();
+    };
+
+    span.addEventListener('blur', finish, { once: true });
+    span.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); span.blur(); }
+    });
+  }
+
+  function setFilter(f, btn) {
+    filter = f;
+    document.querySelectorAll('.filters button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render();
+  }
+
+  function getVisibleTasks() {
+    if (filter === 'active') return tasks.filter(t => !t.done);
+    if (filter === 'done') return tasks.filter(t => t.done);
+    return tasks;
+  }
+
+  function render() {
+    const visible = getVisibleTasks();
+    listEl.innerHTML = '';
+
+    if (visible.length === 0) {
+      listEl.innerHTML = '<li class="empty" style="border:none;">Nothing here yet</li>';
+    } else {
+      visible.forEach(task => {
+        const li = document.createElement('li');
+        li.className = task.done ? 'done' : '';
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = task.done;
+        checkbox.addEventListener('change', () => toggleDone(task.id));
+
+        const span = document.createElement('span');
+        span.className = 'task-text';
+        span.textContent = task.text;
+
+        const editBtn = document.createElement('button');
+        editBtn.className = 'icon-btn edit';
+        editBtn.textContent = '✎';
+        editBtn.addEventListener('click', () => editTask(task.id, span));
+
+        const delBtn = document.createElement('button');
+        delBtn.className = 'icon-btn del';
+        delBtn.textContent = '✕';
+        delBtn.addEventListener('click', () => deleteTask(task.id));
+
+        li.append(checkbox, span, editBtn, delBtn);
+        listEl.appendChild(li);
+      });
+    }
+
+    const remaining = tasks.filter(t => !t.done).length;
+    document.getElementById('taskCount').textContent =
+      tasks.length ? `${remaining} of ${tasks.length} tasks remaining` : '';
+  }
+
+  render();
+</script>
+</body>
+</html>

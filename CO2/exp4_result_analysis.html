@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exp 4 · Student Result Analysis System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#12172b; --surface:#1b2140; --surface-2:#232a4d;
+    --accent:#3ddc97; --accent-2:#ffb347; --danger:#ff6b6b;
+    --text:#eef1fb; --muted:#9aa3c7; --border:#2f3766;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); padding:36px 16px;}
+  .wrap{max-width:900px; margin:0 auto;}
+  h1{font-family:'Space Grotesk',sans-serif; text-align:center; margin-bottom:6px;}
+  p.sub{text-align:center; color:var(--muted); margin-bottom:28px; font-size:0.9rem;}
+
+  .panel{
+    background:var(--surface); border:1px solid var(--border); border-radius:16px;
+    padding:24px; margin-bottom:24px; box-shadow:0 15px 40px rgba(0,0,0,0.3);
+  }
+  .form-row{display:grid; grid-template-columns:2fr 1fr 1fr 1fr auto; gap:10px; align-items:end;}
+  .field label{display:block; font-size:0.78rem; color:var(--muted); margin-bottom:5px;}
+  input{
+    width:100%; padding:10px; border-radius:8px; border:1px solid var(--border);
+    background:var(--surface-2); color:var(--text); font-size:0.9rem; outline:none;
+  }
+  input:focus{border-color:var(--accent);}
+  button.add{
+    padding:10px 18px; border:none; border-radius:8px; background:var(--accent);
+    color:#0d1420; font-weight:600; cursor:pointer; white-space:nowrap;
+  }
+
+  table{width:100%; border-collapse:collapse; margin-top:18px; font-size:0.9rem;}
+  th, td{padding:10px 12px; text-align:center; border-bottom:1px solid var(--border);}
+  th{color:var(--accent-2); font-family:'Space Grotesk',sans-serif; font-weight:600; text-transform:uppercase; font-size:0.75rem; letter-spacing:0.03em;}
+  td:first-child, th:first-child{text-align:left;}
+  tr:hover td{background:var(--surface-2);}
+  .grade{padding:3px 10px; border-radius:6px; font-weight:600; font-size:0.8rem;}
+  .grade-A{background:rgba(61,220,151,0.15); color:var(--accent);}
+  .grade-B{background:rgba(255,179,71,0.15); color:var(--accent-2);}
+  .grade-F{background:rgba(255,107,107,0.15); color:var(--danger);}
+  .del{background:none; border:none; color:var(--danger); cursor:pointer; font-size:0.85rem;}
+
+  .stats{display:grid; grid-template-columns:repeat(4, 1fr); gap:14px; margin-top:20px;}
+  .stat{
+    background:var(--surface-2); border:1px solid var(--border); border-radius:12px;
+    padding:16px; text-align:center;
+  }
+  .stat .label{font-size:0.75rem; color:var(--muted); margin-bottom:6px; text-transform:uppercase;}
+  .stat .value{font-family:'Space Grotesk',sans-serif; font-size:1.4rem; font-weight:700; color:var(--accent);}
+  .empty{text-align:center; color:var(--muted); padding:24px; font-size:0.9rem;}
+
+  @media (max-width:700px){
+    .form-row{grid-template-columns:1fr 1fr; }
+    .stats{grid-template-columns:1fr 1fr;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Student Result Analysis System</h1>
+  <p class="sub">Add student marks and get an instant grade &amp; class analysis</p>
+
+  <div class="panel">
+    <div class="form-row">
+      <div class="field"><label>Student Name</label><input id="sName" placeholder="e.g. Arjun"></div>
+      <div class="field"><label>Maths</label><input id="sMaths" type="number" min="0" max="100"></div>
+      <div class="field"><label>Physics</label><input id="sPhysics" type="number" min="0" max="100"></div>
+      <div class="field"><label>CS</label><input id="sCS" type="number" min="0" max="100"></div>
+      <button class="add" onclick="addStudent()">Add Student</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr><th>Name</th><th>Maths</th><th>Physics</th><th>CS</th><th>Total</th><th>Average</th><th>Grade</th><th></th></tr>
+      </thead>
+      <tbody id="resultBody">
+        <tr><td colspan="8" class="empty">No students added yet</td></tr>
+      </tbody>
+    </table>
+
+    <div class="stats">
+      <div class="stat"><div class="label">Class Average</div><div class="value" id="classAvg">--</div></div>
+      <div class="stat"><div class="label">Highest Score</div><div class="value" id="highScore">--</div></div>
+      <div class="stat"><div class="label">Lowest Score</div><div class="value" id="lowScore">--</div></div>
+      <div class="stat"><div class="label">Pass Rate</div><div class="value" id="passRate">--</div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Each student is stored as an object inside this array
+  let students = [];
+
+  function computeGrade(avg) {
+    if (avg >= 75) return 'A';
+    if (avg >= 40) return 'B';
+    return 'F';
+  }
+
+  function addStudent() {
+    const name = document.getElementById('sName').value.trim();
+    const maths = Number(document.getElementById('sMaths').value);
+    const physics = Number(document.getElementById('sPhysics').value);
+    const cs = Number(document.getElementById('sCS').value);
+
+    if (!name || [maths, physics, cs].some(v => isNaN(v))) {
+      alert('Please fill in the student name and all three marks.');
+      return;
+    }
+
+    const total = maths + physics + cs;
+    const average = total / 3;
+
+    students.push({ name, maths, physics, cs, total, average });
+
+    ['sName','sMaths','sPhysics','sCS'].forEach(id => document.getElementById(id).value = '');
+    render();
+  }
+
+  function deleteStudent(index) {
+    students.splice(index, 1);
+    render();
+  }
+
+  function render() {
+    const body = document.getElementById('resultBody');
+
+    if (students.length === 0) {
+      body.innerHTML = '<tr><td colspan="8" class="empty">No students added yet</td></tr>';
+      resetStats();
+      return;
+    }
+
+    let rows = '';
+    for (let i = 0; i < students.length; i++) {
+      const s = students[i];
+      const grade = computeGrade(s.average);
+      rows += `<tr>
+        <td>${s.name}</td>
+        <td>${s.maths}</td>
+        <td>${s.physics}</td>
+        <td>${s.cs}</td>
+        <td>${s.total}</td>
+        <td>${s.average.toFixed(1)}</td>
+        <td><span class="grade grade-${grade}">${grade}</span></td>
+        <td><button class="del" onclick="deleteStudent(${i})">Remove</button></td>
+      </tr>`;
+    }
+    body.innerHTML = rows;
+
+    computeStats();
+  }
+
+  function computeStats() {
+    const averages = students.map(s => s.average);
+    const classAvg = averages.reduce((sum, a) => sum + a, 0) / averages.length;
+    const highest = Math.max(...averages);
+    const lowest = Math.min(...averages);
+    const passCount = students.filter(s => s.average >= 40).length;
+    const passRate = (passCount / students.length) * 100;
+
+    document.getElementById('classAvg').textContent = classAvg.toFixed(1);
+    document.getElementById('highScore').textContent = highest.toFixed(1);
+    document.getElementById('lowScore').textContent = lowest.toFixed(1);
+    document.getElementById('passRate').textContent = passRate.toFixed(0) + '%';
+  }
+
+  function resetStats() {
+    ['classAvg','highScore','lowScore','passRate'].forEach(id => document.getElementById(id).textContent = '--');
+  }
+</script>
+</body>
+</html>

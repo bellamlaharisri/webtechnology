@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exp 3 · Scientific Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#12172b; --surface:#1b2140; --key:#232a4d; --key-op:#2f3766;
+    --accent:#3ddc97; --accent-2:#ffb347; --text:#eef1fb; --muted:#9aa3c7;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+    font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); padding:20px;
+  }
+  .calc{
+    width:100%; max-width:380px; background:var(--surface); border-radius:22px;
+    padding:22px; box-shadow:0 25px 60px rgba(0,0,0,0.4); border:1px solid #2f3766;
+  }
+  h1{
+    font-family:'Space Grotesk',sans-serif; font-size:1.1rem; text-align:center;
+    margin:0 0 14px; color:var(--accent-2); letter-spacing:0.03em;
+  }
+  .display{
+    background:#0d1224; border-radius:14px; padding:18px 16px; text-align:right;
+    margin-bottom:16px; min-height:76px; display:flex; flex-direction:column; justify-content:flex-end;
+  }
+  #expression{font-family:'JetBrains Mono',monospace; color:var(--muted); font-size:0.85rem; min-height:16px; word-break:break-all;}
+  #result{font-family:'JetBrains Mono',monospace; font-size:1.8rem; font-weight:600; word-break:break-all;}
+  .keys{
+    display:grid; grid-template-columns:repeat(5, 1fr); gap:8px;
+  }
+  button{
+    padding:14px 0; border:none; border-radius:10px; background:var(--key); color:var(--text);
+    font-size:0.95rem; cursor:pointer; transition:filter .1s, transform .05s; font-family:'JetBrains Mono',monospace;
+  }
+  button:hover{filter:brightness(1.2);}
+  button:active{transform:scale(0.95);}
+  .op{background:var(--key-op); color:var(--accent-2);}
+  .fn{background:var(--key-op); color:var(--accent); font-size:0.8rem;}
+  .eq{background:var(--accent); color:#0d1420; font-weight:700; grid-column:span 2;}
+  .clear{background:#4a2530; color:#ff8a8a;}
+  .wide{grid-column:span 2;}
+</style>
+</head>
+<body>
+
+<div class="calc">
+  <h1>Scientific Calculator</h1>
+  <div class="display">
+    <div id="expression"></div>
+    <div id="result">0</div>
+  </div>
+
+  <div class="keys">
+    <button class="fn" onclick="appendFn('sin(')">sin</button>
+    <button class="fn" onclick="appendFn('cos(')">cos</button>
+    <button class="fn" onclick="appendFn('tan(')">tan</button>
+    <button class="fn" onclick="appendFn('sqrt(')">√</button>
+    <button class="clear" onclick="clearAll()">C</button>
+
+    <button class="fn" onclick="appendFn('log(')">log</button>
+    <button class="op" onclick="appendVal('(')">(</button>
+    <button class="op" onclick="appendVal(')')">)</button>
+    <button class="op" onclick="appendVal('%')">%</button>
+    <button class="clear" onclick="backspace()">⌫</button>
+
+    <button onclick="appendVal('7')">7</button>
+    <button onclick="appendVal('8')">8</button>
+    <button onclick="appendVal('9')">9</button>
+    <button class="op" onclick="appendVal('/')">÷</button>
+    <button class="fn" onclick="appendConst('pi')">π</button>
+
+    <button onclick="appendVal('4')">4</button>
+    <button onclick="appendVal('5')">5</button>
+    <button onclick="appendVal('6')">6</button>
+    <button class="op" onclick="appendVal('*')">×</button>
+    <button class="fn" onclick="appendConst('e')">e</button>
+
+    <button onclick="appendVal('1')">1</button>
+    <button onclick="appendVal('2')">2</button>
+    <button onclick="appendVal('3')">3</button>
+    <button class="op" onclick="appendVal('-')">−</button>
+    <button class="fn" onclick="appendFn('pow(')">xʸ</button>
+
+    <button class="wide" onclick="appendVal('0')">0</button>
+    <button onclick="appendVal('.')">.</button>
+    <button class="op" onclick="appendVal('+')">+</button>
+    <button class="eq" onclick="calculate()">=</button>
+  </div>
+</div>
+
+<script>
+  const expressionEl = document.getElementById('expression');
+  const resultEl = document.getElementById('result');
+  let expression = '';
+
+  function updateDisplay() {
+    expressionEl.textContent = expression;
+  }
+
+  function appendVal(val) {
+    expression += val;
+    updateDisplay();
+  }
+
+  function appendFn(fnName) {
+    expression += fnName;
+    updateDisplay();
+  }
+
+  function appendConst(name) {
+    expression += (name === 'pi' ? Math.PI.toFixed(6) : Math.E.toFixed(6));
+    updateDisplay();
+  }
+
+  function clearAll() {
+    expression = '';
+    resultEl.textContent = '0';
+    updateDisplay();
+  }
+
+  function backspace() {
+    expression = expression.slice(0, -1);
+    updateDisplay();
+  }
+
+  // Converts calculator-friendly names into real Math object calls
+  function toJsExpression(expr) {
+    return expr
+      .replace(/sin\(/g, 'Math.sin(')
+      .replace(/cos\(/g, 'Math.cos(')
+      .replace(/tan\(/g, 'Math.tan(')
+      .replace(/sqrt\(/g, 'Math.sqrt(')
+      .replace(/log\(/g, 'Math.log10(')
+      .replace(/pow\(/g, 'Math.pow(')
+      .replace(/%/g, '/100');
+  }
+
+  function calculate() {
+    if (!expression) return;
+    try {
+      const jsExpr = toJsExpression(expression);
+      // eslint-disable-next-line no-new-func
+      const value = Function('"use strict"; return (' + jsExpr + ')')();
+      if (typeof value !== 'number' || !isFinite(value)) throw new Error('Invalid result');
+      resultEl.textContent = Number(value.toFixed(8)).toString();
+    } catch (err) {
+      resultEl.textContent = 'Error';
+    }
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') calculate();
+    if (e.key === 'Backspace') backspace();
+    if (e.key === 'Escape') clearAll();
+  });
+</script>
+</body>
+</html>
