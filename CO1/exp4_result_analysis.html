@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Exp 4: Student Result Analysis System</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #f5f7fa; padding: 25px; }
+  .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 25px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08); }
+  h2 { text-align: center; color: #2c3e50; }
+  form { display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap; justify-content: center; }
+  input { padding: 8px; border: 1px solid #ccc; border-radius: 5px; width: 140px; }
+  button { padding: 8px 16px; background: #4a90d9; color: #fff; border: none; border-radius: 5px; cursor: pointer; }
+  button:hover { background: #3a78bd; }
+  table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+  th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+  th { background: #4a90d9; color: #fff; }
+  tr:nth-child(even) { background: #f2f7fc; }
+  .pass { color: #27ae60; font-weight: bold; }
+  .fail { color: #e74c3c; font-weight: bold; }
+  #summary { margin-top: 20px; padding: 15px; background: #f0f4f9; border-left: 4px solid #4a90d9; border-radius: 6px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h2>Student Result Analysis System</h2>
+  <form id="studentForm">
+    <input type="text" id="sname" placeholder="Student Name" required>
+    <input type="number" id="marks" placeholder="Marks (0-100)" min="0" max="100" required>
+    <button type="submit">Add Student</button>
+  </form>
+
+  <table>
+    <thead><tr><th>#</th><th>Name</th><th>Marks</th><th>Result</th></tr></thead>
+    <tbody id="resultBody"></tbody>
+  </table>
+
+  <div id="summary">No data yet.</div>
+</div>
+
+<script>
+  let students = []; // array of objects {name, marks}
+
+  const form = document.getElementById('studentForm');
+  const resultBody = document.getElementById('resultBody');
+  const summary = document.getElementById('summary');
+  const PASS_MARK = 40;
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    const name = document.getElementById('sname').value.trim();
+    const marks = parseFloat(document.getElementById('marks').value);
+
+    if (!name || isNaN(marks) || marks < 0 || marks > 100) {
+      alert('Please enter valid name and marks (0-100).');
+      return;
+    }
+
+    students.push({ name: name, marks: marks });
+    form.reset();
+    renderTable();
+  });
+
+  function renderTable() {
+    resultBody.innerHTML = '';
+    for (let i = 0; i < students.length; i++) {
+      const s = students[i];
+      const passed = s.marks >= PASS_MARK;
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${i + 1}</td>
+        <td>${s.name}</td>
+        <td>${s.marks}</td>
+        <td class="${passed ? 'pass' : 'fail'}">${passed ? 'Pass' : 'Fail'}</td>
+      `;
+      resultBody.appendChild(row);
+    }
+    updateSummary();
+  }
+
+  function updateSummary() {
+    if (students.length === 0) {
+      summary.textContent = 'No data yet.';
+      return;
+    }
+    const allMarks = students.map(s => s.marks);
+    const total = allMarks.reduce((a, b) => a + b, 0);
+    const average = (total / allMarks.length).toFixed(2);
+    const highest = Math.max(...allMarks);
+    const lowest = Math.min(...allMarks);
+    const topper = students.find(s => s.marks === highest).name;
+    const passCount = students.filter(s => s.marks >= PASS_MARK).length;
+
+    summary.innerHTML = `
+      <strong>Total Students:</strong> ${students.length} &nbsp; | &nbsp;
+      <strong>Average:</strong> ${average} &nbsp; | &nbsp;
+      <strong>Highest:</strong> ${highest} (${topper}) &nbsp; | &nbsp;
+      <strong>Lowest:</strong> ${lowest} &nbsp; | &nbsp;
+      <strong>Pass:</strong> ${passCount} / ${students.length}
+    `;
+  }
+</script>
+</body>
+</html>

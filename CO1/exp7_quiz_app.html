@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Exp 7: Online Quiz Application with Automatic Scoring</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #eef1f7; display: flex; justify-content: center; padding: 30px; }
+  .quiz-card { background: #fff; width: 480px; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+  h2 { text-align: center; color: #2c3e50; margin-bottom: 15px; }
+  #progress { text-align: center; color: #888; margin-bottom: 15px; font-size: 14px; }
+  .question { font-size: 17px; font-weight: bold; margin-bottom: 15px; color: #2c3e50; }
+  .option {
+    display: block; padding: 10px 14px; margin-bottom: 10px; background: #f7faff;
+    border: 1px solid #dbe6f5; border-radius: 8px; cursor: pointer;
+  }
+  .option:hover { background: #eaf2ff; }
+  .option.selected { background: #4a90d9; color: #fff; }
+  .nav-btns { display: flex; justify-content: space-between; margin-top: 20px; }
+  button { padding: 10px 18px; border: none; border-radius: 6px; background: #4a90d9; color: #fff; cursor: pointer; }
+  button:disabled { background: #b7c8db; cursor: not-allowed; }
+  button:hover:not(:disabled) { background: #3a78bd; }
+  #result { text-align: center; }
+  #result h3 { font-size: 24px; color: #27ae60; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+<div class="quiz-card" id="quizCard">
+  <h2>Web Development Quiz</h2>
+  <div id="progress"></div>
+  <div id="quizBody"></div>
+  <div class="nav-btns">
+    <button id="prevBtn" onclick="changeQuestion(-1)">Previous</button>
+    <button id="nextBtn" onclick="changeQuestion(1)">Next</button>
+  </div>
+</div>
+
+<script>
+  const quizData = [
+    { question: "Which tag is used to define an internal style sheet?", options: ["<style>", "<css>", "<script>", "<link>"], answer: 0 },
+    { question: "Which CSS property controls text size?", options: ["font-style", "text-size", "font-size", "size"], answer: 2 },
+    { question: "Which JS keyword declares a block-scoped variable?", options: ["var", "let", "static", "define"], answer: 1 },
+    { question: "Which method converts a string to an integer in JS?", options: ["Number.parse()", "parseInt()", "toInt()", "String.toInt()"], answer: 1 },
+    { question: "Which CSS layout model uses rows and columns?", options: ["Flexbox", "Float", "Grid", "Position"], answer: 2 }
+  ];
+
+  let currentIndex = 0;
+  let userAnswers = new Array(quizData.length).fill(null);
+
+  const quizBody = document.getElementById('quizBody');
+  const progress = document.getElementById('progress');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+
+  function renderQuestion() {
+    const q = quizData[currentIndex];
+    progress.textContent = `Question ${currentIndex + 1} of ${quizData.length}`;
+    let html = `<div class="question">${q.question}</div>`;
+    q.options.forEach((opt, i) => {
+      const selectedClass = userAnswers[currentIndex] === i ? 'selected' : '';
+      html += `<div class="option ${selectedClass}" onclick="selectOption(${i})">${opt}</div>`;
+    });
+    quizBody.innerHTML = html;
+    prevBtn.disabled = currentIndex === 0;
+    nextBtn.textContent = currentIndex === quizData.length - 1 ? 'Submit' : 'Next';
+  }
+
+  function selectOption(i) {
+    userAnswers[currentIndex] = i;
+    renderQuestion();
+  }
+
+  function changeQuestion(direction) {
+    if (direction === 1 && currentIndex === quizData.length - 1) {
+      submitQuiz();
+      return;
+    }
+    currentIndex += direction;
+    renderQuestion();
+  }
+
+  function submitQuiz() {
+    let score = 0;
+    quizData.forEach((q, i) => {
+      if (userAnswers[i] === q.answer) score++;
+    });
+    const percent = ((score / quizData.length) * 100).toFixed(0);
+    document.getElementById('quizCard').innerHTML = `
+      <div id="result">
+        <h3>You scored ${score} / ${quizData.length}</h3>
+        <p>${percent}% correct</p>
+        <p>${percent >= 60 ? "Great job! ✅" : "Keep practicing! 📘"}</p>
+        <button onclick="location.reload()">Retake Quiz</button>
+      </div>
+    `;
+  }
+
+  renderQuestion();
+</script>
+</body>
+</html>

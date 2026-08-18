@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Exp 3: Interactive Scientific Calculator</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #1e2530; display: flex; justify-content: center; align-items: center; height: 100vh; margin:0; }
+  .calculator { background: #2c3542; padding: 20px; border-radius: 14px; box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
+  #display {
+    width: 100%; height: 60px; font-size: 26px; text-align: right; padding: 10px 15px;
+    box-sizing: border-box; border: none; border-radius: 8px; margin-bottom: 15px; background: #10151d; color: #fff;
+  }
+  .buttons { display: grid; grid-template-columns: repeat(5, 55px); gap: 8px; }
+  button {
+    height: 50px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer;
+    background: #3d4757; color: #fff; transition: 0.15s;
+  }
+  button:hover { background: #4e5c70; }
+  button.op { background: #e67e22; }
+  button.op:hover { background: #d3691a; }
+  button.eq { background: #27ae60; grid-column: span 2; }
+  button.eq:hover { background: #219150; }
+  button.clear { background: #e74c3c; }
+</style>
+</head>
+<body>
+<div class="calculator">
+  <input type="text" id="display" readonly>
+  <div class="buttons">
+    <button class="clear" onclick="clearDisplay()">C</button>
+    <button onclick="appendVal('(')">(</button>
+    <button onclick="appendVal(')')">)</button>
+    <button class="op" onclick="appendVal('%')">%</button>
+    <button class="op" onclick="appendVal('/')">÷</button>
+
+    <button onclick="appendVal('7')">7</button>
+    <button onclick="appendVal('8')">8</button>
+    <button onclick="appendVal('9')">9</button>
+    <button class="op" onclick="appendVal('*')">×</button>
+    <button class="op" onclick="calcFunction('sqrt')">√</button>
+
+    <button onclick="appendVal('4')">4</button>
+    <button onclick="appendVal('5')">5</button>
+    <button onclick="appendVal('6')">6</button>
+    <button class="op" onclick="appendVal('-')">−</button>
+    <button class="op" onclick="calcFunction('pow')">x²</button>
+
+    <button onclick="appendVal('1')">1</button>
+    <button onclick="appendVal('2')">2</button>
+    <button onclick="appendVal('3')">3</button>
+    <button class="op" onclick="appendVal('+')">+</button>
+    <button class="op" onclick="calcFunction('sin')">sin</button>
+
+    <button onclick="appendVal('0')">0</button>
+    <button onclick="appendVal('.')">.</button>
+    <button class="op" onclick="calcFunction('cos')">cos</button>
+    <button class="op" onclick="calcFunction('log')">log</button>
+    <button class="eq" onclick="calculate()">=</button>
+  </div>
+</div>
+
+<script>
+  const display = document.getElementById('display');
+
+  function appendVal(val) {
+    display.value += val;
+  }
+
+  function clearDisplay() {
+    display.value = '';
+  }
+
+  function calcFunction(fn) {
+    const current = parseFloat(display.value);
+    if (isNaN(current)) { display.value = 'Error'; return; }
+    let result;
+    switch (fn) {
+      case 'sqrt': result = Math.sqrt(current); break;
+      case 'pow': result = Math.pow(current, 2); break;
+      case 'sin': result = Math.sin(current * Math.PI / 180); break;
+      case 'cos': result = Math.cos(current * Math.PI / 180); break;
+      case 'log': result = Math.log10(current); break;
+    }
+    display.value = Number(result.toFixed(6));
+  }
+
+  function calculate() {
+    try {
+      display.value = Function('"use strict";return (' + display.value + ')')();
+    } catch (e) {
+      display.value = 'Error';
+    }
+  }
+
+  // Allow keyboard input
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') calculate();
+    else if (e.key === 'Escape') clearDisplay();
+    else if (/[0-9+\-*/.%()]/.test(e.key)) appendVal(e.key);
+  });
+</script>
+</body>
+</html>

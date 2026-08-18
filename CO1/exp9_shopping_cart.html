@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Exp 9: Product Shopping Cart and Billing System</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #f2f4f8; padding: 25px; }
+  .container { max-width: 900px; margin: 0 auto; }
+  h2 { text-align: center; color: #2c3e50; margin-bottom: 20px; }
+  .products { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; }
+  .product-card { background: #fff; border-radius: 10px; padding: 15px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+  .product-card h4 { color: #2c3e50; margin-bottom: 5px; }
+  .product-card p { color: #4a90d9; font-weight: bold; margin-bottom: 10px; }
+  .product-card button { padding: 6px 14px; background: #4a90d9; color: #fff; border: none; border-radius: 5px; cursor: pointer; }
+  .product-card button:hover { background: #3a78bd; }
+
+  table { width: 100%; background: #fff; border-collapse: collapse; border-radius: 8px; overflow: hidden; }
+  th, td { padding: 10px; border-bottom: 1px solid #eee; text-align: center; }
+  th { background: #34495e; color: #fff; }
+  .qty-btn { padding: 3px 9px; border: none; background: #eee; cursor: pointer; border-radius: 4px; }
+  .del-btn { color: #e74c3c; border: none; background: none; cursor: pointer; font-size: 16px; }
+
+  .bill-box { background: #fff; margin-top: 20px; padding: 20px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+  .bill-row { display: flex; justify-content: space-between; padding: 6px 0; }
+  .bill-row.total { font-weight: bold; font-size: 18px; border-top: 2px solid #4a90d9; margin-top: 8px; padding-top: 10px; color: #2c3e50; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h2>Shopping Cart & Billing System</h2>
+
+  <div class="products" id="productList"></div>
+
+  <table>
+    <thead><tr><th>Product</th><th>Price</th><th>Qty</th><th>Subtotal</th><th></th></tr></thead>
+    <tbody id="cartBody"><tr><td colspan="5">Cart is empty</td></tr></tbody>
+  </table>
+
+  <div class="bill-box">
+    <div class="bill-row"><span>Subtotal</span><span id="subtotal">₹0.00</span></div>
+    <div class="bill-row"><span>Discount (10% if subtotal > ₹1000)</span><span id="discount">₹0.00</span></div>
+    <div class="bill-row"><span>Tax (18% GST)</span><span id="tax">₹0.00</span></div>
+    <div class="bill-row total"><span>Grand Total</span><span id="grandTotal">₹0.00</span></div>
+  </div>
+</div>
+
+<script>
+  const products = [
+    { id: 1, name: "Wireless Mouse", price: 599 },
+    { id: 2, name: "Mechanical Keyboard", price: 2499 },
+    { id: 3, name: "USB-C Hub", price: 899 },
+    { id: 4, name: "Laptop Stand", price: 1199 },
+    { id: 5, name: "Webcam HD", price: 1599 },
+    { id: 6, name: "Bluetooth Speaker", price: 1299 }
+  ];
+
+  let cart = []; // { id, name, price, qty }
+
+  const productList = document.getElementById('productList');
+  products.forEach(p => {
+    const div = document.createElement('div');
+    div.className = 'product-card';
+    div.innerHTML = `<h4>${p.name}</h4><p>₹${p.price}</p><button onclick="addToCart(${p.id})">Add to Cart</button>`;
+    productList.appendChild(div);
+  });
+
+  function addToCart(id) {
+    const product = products.find(p => p.id === id);
+    const existing = cart.find(item => item.id === id);
+    if (existing) {
+      existing.qty += 1;
+    } else {
+      cart.push({ ...product, qty: 1 });
+    }
+    renderCart();
+  }
+
+  function changeQty(id, delta) {
+    const item = cart.find(i => i.id === id);
+    item.qty += delta;
+    if (item.qty <= 0) cart = cart.filter(i => i.id !== id);
+    renderCart();
+  }
+
+  function removeItem(id) {
+    cart = cart.filter(i => i.id !== id);
+    renderCart();
+  }
+
+  function renderCart() {
+    const cartBody = document.getElementById('cartBody');
+    if (cart.length === 0) {
+      cartBody.innerHTML = '<tr><td colspan="5">Cart is empty</td></tr>';
+    } else {
+      cartBody.innerHTML = cart.map(item => `
+        <tr>
+          <td>${item.name}</td>
+          <td>₹${item.price}</td>
+          <td>
+            <button class="qty-btn" onclick="changeQty(${item.id}, -1)">-</button>
+            ${item.qty}
+            <button class="qty-btn" onclick="changeQty(${item.id}, 1)">+</button>
+          </td>
+          <td>₹${(item.price * item.qty).toFixed(2)}</td>
+          <td><button class="del-btn" onclick="removeItem(${item.id})">✕</button></td>
+        </tr>
+      `).join('');
+    }
+    calculateBill();
+  }
+
+  function calculateBill() {
+    const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+    const discount = subtotal > 1000 ? subtotal * 0.10 : 0;
+    const taxable = subtotal - discount;
+    const tax = taxable * 0.18;
+    const grandTotal = taxable + tax;
+
+    document.getElementById('subtotal').textContent = `₹${subtotal.toFixed(2)}`;
+    document.getElementById('discount').textContent = `₹${discount.toFixed(2)}`;
+    document.getElementById('tax').textContent = `₹${tax.toFixed(2)}`;
+    document.getElementById('grandTotal').textContent = `₹${grandTotal.toFixed(2)}`;
+  }
+</script>
+</body>
+</html>

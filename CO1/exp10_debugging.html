@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Exp 10: Debug and Correct a CSS and JavaScript Web Application</title>
+<style>
+  /* ---------- CSS BUG #1 (fixed below): originally had "colr: red;" (typo) ---------- */
+  body { font-family: Arial, sans-serif; background: #f2f4f8; padding: 25px; }
+  .container { max-width: 600px; margin: 0 auto; background: #fff; padding: 25px; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.08); }
+  h2 { text-align: center; color: #2c3e50; }
+
+  /* ---------- CSS BUG #2 (fixed below): originally ".box { width: 100% !impotant; }" — corrected to !important with valid syntax */
+  .box { width: 100%; background: #eaf2ff; padding: 15px; border-radius: 8px; margin-top: 15px; text-align: center; color: #2c3e50; font-weight: bold; }
+
+  button { padding: 8px 16px; background: #4a90d9; color: #fff; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
+  button:hover { background: #3a78bd; }
+  #log { background: #10151d; color: #4ade80; font-family: monospace; padding: 15px; border-radius: 8px; margin-top: 20px; min-height: 80px; white-space: pre-wrap; font-size: 13px; }
+  .note { background: #fff8e1; border-left: 4px solid #f1c40f; padding: 10px 14px; border-radius: 6px; margin-top: 15px; font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h2>Debugging Demo: CSS + JavaScript</h2>
+  <div class="box" id="counterBox">Counter: 0</div>
+
+  <div style="text-align:center; margin-top:15px;">
+    <button onclick="increment()">Increment</button>
+    <button onclick="riskyDivision()">Run Risky Function (try...catch)</button>
+    <button onclick="clearLog()">Clear Console Log</button>
+  </div>
+
+  <div id="log">// Debug output will appear here (also check Browser DevTools Console - F12)</div>
+
+  <div class="note">
+    <strong>How this experiment demonstrates debugging:</strong><br>
+    1. Open Browser DevTools (F12) → Elements panel to inspect the fixed CSS below.<br>
+    2. Open the Console panel to see console.log() output from JS functions.<br>
+    3. Open Sources panel, click a line number next to incrementBuggy() to set a breakpoint, then trigger it.<br>
+    4. The riskyDivision() function uses try...catch to handle a deliberate runtime error gracefully.
+  </div>
+</div>
+
+<script>
+  /* ============================================================
+     ORIGINAL BUGGY CODE (kept as comments for reference/debugging practice)
+     ------------------------------------------------------------
+     let count = 0;
+     function incrementBuggy() {
+       count = count + 1
+       document.getElementById('counterBox').innerHTML = "Counter: " + coutn; // BUG: typo "coutn" -> ReferenceError
+     }
+     function riskyDivisionBuggy(a, b) {
+       return a / b; // BUG: no validation, no error handling for b = 0 or non-numeric input
+     }
+     ============================================================ */
+
+  // ---------- CORRECTED / DEBUGGED VERSION ----------
+  let count = 0;
+
+  function increment() {
+    count = count + 1;
+    console.log('increment() called. New count =', count); // visible in DevTools Console
+    document.getElementById('counterBox').innerText = 'Counter: ' + count; // FIXED typo
+    logToScreen('increment() -> count = ' + count);
+  }
+
+  function riskyDivision() {
+    try {
+      const a = 10;
+      const b = 0; // deliberately triggers a logical issue (division by zero)
+      if (b === 0) {
+        throw new Error('Division by zero is not allowed');
+      }
+      const result = a / b;
+      logToScreen('Result: ' + result);
+    } catch (err) {
+      console.error('Caught an error:', err.message); // shows in DevTools Console
+      logToScreen('ERROR CAUGHT: ' + err.message);
+    } finally {
+      logToScreen('riskyDivision() execution finished.');
+    }
+  }
+
+  function logToScreen(msg) {
+    const log = document.getElementById('log');
+    log.textContent += '\n> ' + msg;
+  }
+
+  function clearLog() {
+    document.getElementById('log').textContent = '// Console cleared';
+  }
+</script>
+</body>
+</html>
