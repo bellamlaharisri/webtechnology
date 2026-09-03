@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CampusConnect | Student Registration</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: "Segoe UI", Arial, sans-serif;
+
+            background:
+                radial-gradient(
+                    circle at 10% 10%,
+                    rgba(99, 102, 241, 0.18),
+                    transparent 30%
+                ),
+                radial-gradient(
+                    circle at 90% 90%,
+                    rgba(139, 92, 246, 0.16),
+                    transparent 30%
+                ),
+                #f8fafc;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            padding: 30px;
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 1050px;
+
+            display: grid;
+            grid-template-columns: 0.9fr 1.1fr;
+
+            background: rgba(255, 255, 255, 0.92);
+
+            border: 1px solid rgba(255,255,255,0.8);
+
+            border-radius: 28px;
+
+            overflow: hidden;
+
+            box-shadow:
+                0 25px 70px rgba(15, 23, 42, 0.14);
+        }
+
+        /* LEFT SIDE */
+
+        .intro {
+            position: relative;
+
+            padding: 55px 45px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    #111827,
+                    #312e81,
+                    #4f46e5
+                );
+
+            color: white;
+
+            overflow: hidden;
+        }
+
+        .intro::before {
+            content: "";
+
+            position: absolute;
+
+            width: 260px;
+            height: 260px;
+
+            border-radius: 50%;
+
+            background: rgba(255,255,255,0.08);
+
+            top: -100px;
+            right: -90px;
+        }
+
+        .intro::after {
+            content: "";
+
+            position: absolute;
+
+            width: 180px;
+            height: 180px;
+
+            border-radius: 50%;
+
+            background: rgba(255,255,255,0.06);
+
+            bottom: -80px;
+            left: -70px;
+        }
+
+        .logo {
+            width: 55px;
+            height: 55px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 16px;
+
+            background: rgba(255,255,255,0.15);
+
+            font-size: 24px;
+            font-weight: bold;
+
+            margin-bottom: 35px;
+        }
+
+        .intro h1 {
+            font-size: 36px;
+            line-height: 1.15;
+
+            margin-bottom: 18px;
+        }
+
+        .intro p {
+            color: #dbeafe;
+
+            line-height: 1.7;
+
+            font-size: 15px;
+        }
+
+        .feature-list {
+            margin-top: 40px;
+
+            list-style: none;
+        }
+
+        .feature-list li {
+            margin-bottom: 18px;
+
+            display: flex;
+            align-items: center;
+
+            gap: 12px;
+
+            color: #e0e7ff;
+        }
+
+        .check {
+            width: 28px;
+            height: 28px;
+
+            border-radius: 50%;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background: rgba(255,255,255,0.14);
+
+            font-size: 14px;
+        }
+
+        /* RIGHT SIDE */
+
+        .form-section {
+            padding: 45px;
+        }
+
+        .form-header {
+            margin-bottom: 30px;
+        }
+
+        .form-header span {
+            color: #6366f1;
+
+            font-size: 13px;
+
+            font-weight: 700;
+
+            letter-spacing: 1.5px;
+
+            text-transform: uppercase;
+        }
+
+        .form-header h2 {
+            margin-top: 8px;
+
+            font-size: 28px;
+
+            color: #111827;
+        }
+
+        .form-header p {
+            margin-top: 7px;
+
+            color: #64748b;
+
+            font-size: 14px;
+        }
+
+        .form-grid {
+            display: grid;
+
+            grid-template-columns: 1fr 1fr;
+
+            gap: 20px;
+        }
+
+        .field {
+            position: relative;
+        }
+
+        .full {
+            grid-column: span 2;
+        }
+
+        label {
+            display: block;
+
+            margin-bottom: 8px;
+
+            color: #334155;
+
+            font-size: 13px;
+
+            font-weight: 700;
+        }
+
+        input,
+        select {
+            width: 100%;
+
+            height: 50px;
+
+            padding: 0 15px;
+
+            border: 1px solid #dbe1ea;
+
+            border-radius: 12px;
+
+            outline: none;
+
+            background: #f8fafc;
+
+            color: #1e293b;
+
+            font-size: 14px;
+
+            transition: all 0.25s ease;
+        }
+
+        input:hover,
+        select:hover {
+            border-color: #a5b4fc;
+        }
+
+        input:focus,
+        select:focus {
+            background: white;
+
+            border-color: #6366f1;
+
+            box-shadow:
+                0 0 0 4px rgba(99,102,241,0.10);
+        }
+
+        input::placeholder {
+            color: #94a3b8;
+        }
+
+        .submit-area {
+            margin-top: 30px;
+        }
+
+        .submit-btn {
+            width: 100%;
+
+            height: 52px;
+
+            border: none;
+
+            border-radius: 13px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #4f46e5,
+                    #7c3aed
+                );
+
+            color: white;
+
+            font-size: 15px;
+
+            font-weight: 700;
+
+            cursor: pointer;
+
+            box-shadow:
+                0 10px 25px rgba(79,70,229,0.25);
+
+            transition: all 0.25s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+
+            box-shadow:
+                0 15px 30px rgba(79,70,229,0.35);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .note {
+            margin-top: 18px;
+
+            padding: 13px 15px;
+
+            border-radius: 10px;
+
+            background: #f8fafc;
+
+            color: #64748b;
+
+            font-size: 12px;
+
+            text-align: center;
+        }
+
+        .required {
+            color: #ef4444;
+        }
+
+        /* RESPONSIVE */
+
+        @media (max-width: 800px) {
+
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+
+            .intro {
+                padding: 35px;
+            }
+
+            .intro h1 {
+                font-size: 28px;
+            }
+
+            .feature-list {
+                display: none;
+            }
+        }
+
+        @media (max-width: 550px) {
+
+            body {
+                padding: 15px;
+            }
+
+            .form-section {
+                padding: 30px 22px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .full {
+                grid-column: span 1;
+            }
+
+            .intro {
+                padding: 30px 25px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="main-container">
+
+        <!-- LEFT PANEL -->
+
+        <section class="intro">
+
+            <div class="logo">
+                CC
+            </div>
+
+            <h1>
+                SIMATS ENGINEERING
+            </h1>
+
+            <p>
+                Student Registration Portal
+            </p>
+
+            <p style="margin-top:15px;">
+                Submit your academic details here
+            </p>
+
+            <ul class="feature-list">
+
+                <li>
+                    <span class="check">✓</span>
+                    Simple student registration
+                </li>
+
+                <li>
+                    <span class="check">✓</span>
+                    Server-side form processing
+                </li>
+
+                <li>
+                    <span class="check">✓</span>
+                    Required field validation
+                </li>
+
+                <li>
+                    <span class="check">✓</span>
+                    Dynamic result generation
+                </li>
+
+            </ul>
+
+        </section>
+
+
+        <!-- FORM PANEL -->
+
+        <section class="form-section">
+
+            <div class="form-header">
+
+                <span>Student Portal</span>
+
+                <h2>
+                    Registration Details
+                </h2>
+
+                <p>
+                    Enter the student's information below.
+                </p>
+
+            </div>
+
+
+            <form
+                action="StudentRegistrationServlet"
+                method="post">
+
+
+                <div class="form-grid">
+
+
+                    <!-- STUDENT NAME -->
+
+                    <div class="field full">
+
+                        <label for="name">
+                            Student Name
+                            <span class="required">*</span>
+                        </label>
+
+                        <input
+                            type="text"
+                            id="name"
+                            name="name"
+                            placeholder="Enter student's full name">
+
+                    </div>
+
+
+                    <!-- REGISTER NUMBER -->
+
+                    <div class="field">
+
+                        <label for="regno">
+                            Register Number
+                            <span class="required">*</span>
+                        </label>
+
+                        <input
+                            type="text"
+                            id="regno"
+                            name="regno"
+                            placeholder="e.g. 24IT101">
+
+                    </div>
+
+
+                    <!-- EMAIL -->
+
+                    <div class="field">
+
+                        <label for="email">
+                            Email
+                            <span class="required">*</span>
+                        </label>
+
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            placeholder="student@example.com">
+
+                    </div>
+
+
+                    <!-- DEPARTMENT -->
+
+                    <div class="field">
+
+                        <label for="department">
+                            Department
+                            <span class="required">*</span>
+                        </label>
+
+                        <select
+                            id="department"
+                            name="department">
+
+                            <option value="">
+                                Select Department
+                            </option>
+
+                            <option value="Information Technology">
+                                Information Technology
+                            </option>
+
+                            <option value="Computer Science">
+                                Computer Science
+                            </option>
+
+                            <option value="Artificial Intelligence">
+                                Artificial Intelligence
+                            </option>
+
+                            <option value="Electronics and Communication">
+                                Electronics and Communication
+                            </option>
+
+                            <option value="Electrical and Electronics">
+                                Electrical and Electronics
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- SEMESTER -->
+
+                    <div class="field">
+
+                        <label for="semester">
+                            Semester
+                            <span class="required">*</span>
+                        </label>
+
+                        <select
+                            id="semester"
+                            name="semester">
+
+                            <option value="">
+                                Select Semester
+                            </option>
+
+                            <option value="Semester 1">
+                                Semester 1
+                            </option>
+
+                            <option value="Semester 2">
+                                Semester 2
+                            </option>
+
+                            <option value="Semester 3">
+                                Semester 3
+                            </option>
+
+                            <option value="Semester 4">
+                                Semester 4
+                            </option>
+
+                            <option value="Semester 5">
+                                Semester 5
+                            </option>
+
+                            <option value="Semester 6">
+                                Semester 6
+                            </option>
+
+                            <option value="Semester 7">
+                                Semester 7
+                            </option>
+
+                            <option value="Semester 8">
+                                Semester 8
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <div class="submit-area">
+
+                    <button
+                        type="submit"
+                        class="submit-btn">
+
+                        Submit Registration →
+
+                    </button>
+
+                </div>
+
+
+                <div class="note">
+
+                    <span class="required">*</span>
+                    All fields are required.
+                    Information is processed by the Java Servlet.
+
+                </div>
+
+            </form>
+
+        </section>
+
+    </div>
+
+</body>
+
+</html>
